@@ -1,4 +1,4 @@
-TITLE Project 02    (project02.asm)
+TITLE Project 02    (project02DePrey.asm)
 
 ; Author: Joseph DePrey
 ; depreyj@oregonstate.edu
@@ -13,9 +13,8 @@ TITLE Project 02    (project02.asm)
 ; 		the nth term. The results are displayed 5 terms per line with at 
 ;		least 5 spaces between terms.
 ;	Display a parting message that includes the user’s name, and terminate the program.
-; **EC: Program repeats until the user chooses to quit
-; **EC: Program verifies second number less than first
-; **EC: Program calculates and displays quotient as floating-point number, rounded to nearest .001 
+; **EC: Number aligned in columns, 5 terms per line
+; **EC: Someting incredible, different colored text for each term
 
 
 INCLUDE Irvine32.inc
@@ -144,8 +143,6 @@ displayFibs:
 	jmp continue
 
 	
-
-
 
 ; display error if desired number of terms is out of range
 errorDisplay:
