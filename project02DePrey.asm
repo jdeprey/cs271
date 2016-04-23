@@ -19,7 +19,7 @@ TITLE Project 02    (project02DePrey.asm)
 
 INCLUDE Irvine32.inc
 
-UPPERLIMIT = 47			; the maximum number of Fibonnaci terms to be displayed
+UPPERLIMIT = 46			; the maximum number of Fibonnaci terms to be displayed
 
 .data
 
