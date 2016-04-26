@@ -102,7 +102,7 @@ introduction:
 	mov 	edx, OFFSET intro
 	call 	WriteString
 	call 	CrLf
-	
+
 userInstructions:
 	mov 	edx, OFFSET instruct_a
 	call 	WriteString
@@ -114,6 +114,40 @@ userInstructions:
 	mov 	edx, OFFSET instruct_c
 	call 	WriteString
 	call 	CrLf
+
+getUserData:
+; get the data, make sure values are within range
+	mov 	eax, lineCount
+	call 	WriteDec
+	mov 	edx, OFFSET promptNum
+	call 	WriteString
+
+	call 	ReadInt
+	mov 	userInt, eax
+	call 	CrLf
+
+	; validate. if out of range(negative) jump to errorDisplay
+	cmp 	eax, LOWERLIMIT
+	jnge	errorDisplay
+	; if non-negative jump to display
+	cmp		eax, 0
+	jnl 	display
+	; if within range add to sum, increment valid number counter
+	mov 	userInt, eax
+	mov 	eax, sum
+	add 	eax, userInt
+	mov 	sum, eax
+	mov 	eax, validCount
+	inc 	eax
+	mov 	validCount, eax
+
+	; increment line counter
+	mov 	eax, lineCount
+	inc 	eax
+	mov 	lineCount, eax
+
+	; continue asking for numbers
+	jmp 	getUserData
 
 
 	exit	; exit to operating system
