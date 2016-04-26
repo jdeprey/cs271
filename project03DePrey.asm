@@ -102,6 +102,18 @@ introduction:
 	mov 	edx, OFFSET intro
 	call 	WriteString
 	call 	CrLf
+	
+userInstructions:
+	mov 	edx, OFFSET instruct_a
+	call 	WriteString
+	mov 	eax, LOWERLIMIT
+	call 	WriteInt
+	mov 	edx, OFFSET instruct_b
+	call 	WriteString
+	call 	CrLf
+	mov 	edx, OFFSET instruct_c
+	call 	WriteString
+	call 	CrLf
 
 
 	exit	; exit to operating system
