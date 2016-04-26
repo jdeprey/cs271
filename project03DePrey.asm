@@ -149,6 +149,49 @@ getUserData:
 	; continue asking for numbers
 	jmp 	getUserData
 
+display:	
+	; make sure at least one valid number has been entered, else jump to error
+	mov 	eax, validCount
+	cmp 	eax, 0
+	jz 		errorSpecial
+
+	; display number of valid numbers entered
+	mov 	edx, OFFSET totalMsg_a
+	call 	WriteString
+	call 	WriteDec
+	mov 	edx, OFFSET totalMsg_b
+	call 	WriteString
+	call 	CrLf
+	
+	; display sum of valid numbers entered
+	mov 	edx, OFFSET sumMsg
+	call 	WriteString
+	mov 	eax, sum
+	call 	WriteInt
+	call 	CrLf
+
+	; calculate average or rounded average
+	mov 	eax, sum
+	mov 	edx, 0
+	cdq							; extend EAX into EDX
+	mov 	ebx, validCount		; divisor
+	idiv 	ebx 				; quotient in EAX, remainder in EDX
+	mov 	average, eax 		; move quotient to average variable
+	cmp 	edx, 0      		; if remainder is zero do not round or calculate floating-point
+	jz 		averageDisplay
+	mov 	remainder, edx
+
+	; if the remainder is greater than half of divisor then round-down(decrement)
+	; use a positive remainder for comparison
+	neg 	remainder
+	mov 	eax, remainder
+	mov 	ebx, 2
+	mul 	ebx
+	cmp 	eax, validCount
+	jna		averageDisplay		; if remainder not greater than half of divisor jump to display
+	mov 	eax, average
+	dec 	eax
+	mov 	average, eax
 
 	exit	; exit to operating system
 main ENDP
