@@ -193,6 +193,37 @@ display:
 	dec 	eax
 	mov 	average, eax
 
+averageDisplay:
+; display average of valid user numbers
+	mov 	edx, OFFSET avgMsg
+	call 	WriteString
+	mov 	eax, average
+	call 	WriteInt
+	call 	CrLf
+
+	jmp 	goodbyeDisplay
+
+errorDisplay:
+; display error if desired number of terms is out of range
+		mov 	edx, OFFSET errorMsg
+		call 	WriteString
+		call 	CrLf
+		jmp		getUserData
+
+errorSpecial:
+; display special error if user did not enter any valid numbers
+		mov 	edx, OFFSET errorMsgSpecial
+		call 	WriteString
+
+goodbyeDisplay:
+		; say goodbye
+		call 	CrLf
+		mov 	edx, OFFSET goodBye
+		call 	WriteString
+		mov 	edx, OFFSET userName
+		call 	 WriteString
+		call 	CrLf
+
 	exit	; exit to operating system
 main ENDP
 
