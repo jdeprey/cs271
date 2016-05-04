@@ -22,8 +22,7 @@ TITLE Project 03    (project03DePrey.asm)
 ; **EC: Number the lines during user input
 ; **EC: Calculate and display the average as a floating-point number,
 ; 		rounded to the nearest .001
-; **EC: Seomthing astoundingly creative
-
+; **EC: Display max, min	
 
 INCLUDE Irvine32.inc
 
@@ -45,6 +44,9 @@ totalMsg_b	 	BYTE		" valid numbers.", 0
 sumMsg 		   	BYTE 		"Sum (of valid numbers): ", 0
 avgMsg 	 		BYTE 		"Rounded Average: ", 0
 floatMsg		BYTE		"Average (as floating-point): ", 0
+maxMsg			BYTE		"Maximum: ", 0
+minMsg			BYTE		"Minimum: ", 0
+
 errorMsg		BYTE		"Invalid input. Please enter an integer within range.", 0
 errorMsgSpecial BYTE 		"Sorry, but you failed to enter a single valid number.", 0
 dot				BYTE 		".", 0
@@ -52,7 +54,7 @@ goodBye 		BYTE 		"Until next time ", 0
 
 EC_1			BYTE		"**EC1: Numbered lines during user input", 0
 EC_2			BYTE		"**EC2: Average displayed as floating-point, rounded to nearest .001", 0
-EC_3			BYTE		"**EC3: Something special", 0
+EC_3			BYTE		"**EC3: Display maximum and minimum of numbers", 0
 
 userName		BYTE 		26 DUP(?)		; user's name and input buffer
 
@@ -62,9 +64,12 @@ lineCount 		DWORD 		1 		; line numbers for user input
 sum 			SDWORD		0 		; sum of valid numbers inputted by user
 average			SDWORD		? 		; average of valid numbers
 floatInt		SDWORD		?		; integer-part of average
-floatMantissa	DWORD		?		; mantissa of floating-point average
+floatRemainder  DWORD 		?		; remainder of floating-point representation
+floatMantissa	DWORD		0		; mantissa of floating-point average
 remainder		DWORD		?		; remainder 
 roundFactor		DWORD		1000
+currentMax		SDWORD		-100 	; current maximim number inputted
+currentMin 		SDWORD 		0 		; current minimum number inputted
 
 .code
 main PROC
@@ -126,12 +131,27 @@ getUserData:
 	mov 	userInt, eax
 	call 	CrLf
 
+
+	limitCheck:
 	; validate. if out of range(negative) jump to errorDisplay
 	cmp 	eax, LOWERLIMIT
 	jnge	errorDisplay
 	; if non-negative jump to display
 	cmp		eax, 0
-	jnl 	display
+	jns 	calculate
+
+	maxCheck:
+	; compare to current maximum
+	cmp 	eax, currentMax
+	jg 		updateMax
+
+	minCheck:
+	; compare to current mimimum
+	cmp 	eax, currentMin
+	jl 		updateMin	
+
+
+	updateCount:
 	; if within range add to sum, increment valid number counter
 	mov 	userInt, eax
 	mov 	eax, sum
@@ -148,6 +168,66 @@ getUserData:
 
 	; continue asking for numbers
 	jmp 	getUserData
+
+calculate:
+	; calculate average or rounded average
+	mov 	eax, sum
+	mov 	edx, 0
+	cdq							; extend EAX into EDX
+	mov 	ebx, validCount		; divisor
+	idiv 	ebx 				; quotient in EAX, remainder in EDX
+	mov 	average, eax 		; move quotient to average variable
+	mov 	floatInt, eax 		; move quotient to floating-point integer part 
+	cmp 	edx, 0      		; if remainder is zero do not round or calculate floating-point
+	jz 		display
+	mov 	remainder, edx
+
+	; if the remainder is greater than half of divisor then round-down(decrement)
+	; use a positive remainder for comparison
+	neg 	remainder
+	mov 	eax, remainder
+	mov 	ebx, 2
+	mul 	ebx
+	cmp 	eax, validCount
+	jna		calculateFloat		; if remainder not greater than half of divisor, don't round
+	
+	; round down
+	mov 	eax, average
+	dec 	eax
+	mov 	average, eax
+
+calculateFloat:
+	; calculate floating-point representation of average without rounding
+	mov 	eax, remainder
+	mov 	ebx, roundFactor
+	mul 	ebx
+	cdq
+	mov 	ebx, validCount
+	div 	ebx
+	mov 	floatMantissa, eax
+	; test if float's last digit needs to be rounded up 
+	mov 	floatRemainder, edx
+	mov 	eax, edx
+	mov 	ebx, 2
+	mul 	ebx
+	cmp 	eax, validCount
+	jna 	display
+	; round up last digit 
+	mov 	eax, floatMantissa
+	inc 	eax
+	mov 	floatMantissa, eax 
+	jmp 	display
+
+updateMax:
+	; store new maximum
+	mov 	currentMax, eax
+	jmp 	minCheck
+
+
+updateMin:
+	; store new minimum
+	mov 	currentMin, eax
+	jmp 	updateCount
 
 display:	
 	; make sure at least one valid number has been entered, else jump to error
@@ -170,59 +250,64 @@ display:
 	call 	WriteInt
 	call 	CrLf
 
-	; calculate average or rounded average
-	mov 	eax, sum
-	mov 	edx, 0
-	cdq							; extend EAX into EDX
-	mov 	ebx, validCount		; divisor
-	idiv 	ebx 				; quotient in EAX, remainder in EDX
-	mov 	average, eax 		; move quotient to average variable
-	cmp 	edx, 0      		; if remainder is zero do not round or calculate floating-point
-	jz 		averageDisplay
-	mov 	remainder, edx
-
-	; if the remainder is greater than half of divisor then round-down(decrement)
-	; use a positive remainder for comparison
-	neg 	remainder
-	mov 	eax, remainder
-	mov 	ebx, 2
-	mul 	ebx
-	cmp 	eax, validCount
-	jna		averageDisplay		; if remainder not greater than half of divisor jump to display
-	mov 	eax, average
-	dec 	eax
-	mov 	average, eax
-
-averageDisplay:
-; display average of valid user numbers
+	; display average of valid user numbers
 	mov 	edx, OFFSET avgMsg
 	call 	WriteString
 	mov 	eax, average
 	call 	WriteInt
 	call 	CrLf
+	
+	; display floating-point average 
+	mov 	edx, OFFSET floatMsg
+	call 	WriteString
+	mov 	eax, floatInt
+	call 	WriteInt
+	mov 	edx, OFFSET dot
+	call 	WriteString
+	mov 	eax, floatMantissa
+	call 	WriteDec
+	call 	CrLf
 
+
+maxMinDisplay:
+	; display max and min
+	mov 	edx, OFFSET maxMsg
+	call 	WriteString
+	mov 	eax, currentMax
+	call 	WriteInt
+	call 	CrLf
+	mov 	edx, OFFSET minMsg
+	call 	WriteString
+	mov 	eax, currentMin
+	call 	WriteInt
 	jmp 	goodbyeDisplay
 
+updateAverage:
+	; update average 
+	mov 	average, eax
+	jmp 	display
+	
+
 errorDisplay:
-; display error if desired number of terms is out of range
-		mov 	edx, OFFSET errorMsg
-		call 	WriteString
-		call 	CrLf
-		jmp		getUserData
+	; display error if desired number of terms is out of range
+	mov 	edx, OFFSET errorMsg
+	call 	WriteString
+	call 	CrLf
+	jmp		getUserData
 
 errorSpecial:
-; display special error if user did not enter any valid numbers
-		mov 	edx, OFFSET errorMsgSpecial
-		call 	WriteString
+	; display special error if user did not enter any valid numbers
+	mov 	edx, OFFSET errorMsgSpecial
+	call 	WriteString
 
 goodbyeDisplay:
-		; say goodbye
-		call 	CrLf
-		mov 	edx, OFFSET goodBye
-		call 	WriteString
-		mov 	edx, OFFSET userName
-		call 	 WriteString
-		call 	CrLf
+	; say goodbye
+	call 	CrLf
+	mov 	edx, OFFSET goodBye
+	call 	WriteString
+	mov 	edx, OFFSET userName
+	call 	 WriteString
+	call 	CrLf
 
 	exit	; exit to operating system
 main ENDP
