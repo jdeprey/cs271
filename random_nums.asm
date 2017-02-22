@@ -1,11 +1,9 @@
-TITLE Project 05 - Random Numbers    (project05DePrey.asm)
+TITLE Random Numbers    (random_nums.asm)
 
 ; Author: Joseph DePrey
-; depreyj@oregonstate.edu
-; CS271-400 / Project 05                  Due Date: 5/22/16
 ; Description: Generates and displays a user-defined number of random integers in a
-; 	predefined range. Random integers will be stored in an array and then displayed 10 per line. 
-; 	Integers will then be sorted in descending order.  Median value(rounded to nearest integer) 
+; 	predefined range. Random integers will be stored in an array and then displayed 10 per line.
+; 	Integers will then be sorted in descending order.  Median value(rounded to nearest integer)
 ; 	will be calculated and, finally, the sorted list will be displayed.
 ; **EC: Display numbers ordered by column instead of row.
 ; **EC: Use a recursive sorting algorithm
@@ -21,13 +19,13 @@ HI = 999				; highest value of random integers to be generated
 temp_local 		EQU DWORD PTR [ebp-4]
 
 ; macro for push sequence used in procedures
-mPush 			MACRO  
+mPush 			MACRO
 				push 	ebp
 				mov 	ebp, esp
 				pushad
 				ENDM
 ; macro for pop sequence used in procedures. take numbers of bytes to ret as parameter
-mPop			MACRO 	bytes 
+mPop			MACRO 	bytes
 				popad
 				pop 	ebp
 				ret 	bytes
@@ -48,15 +46,15 @@ unsortedMsg 	BYTE 		"The unsorted random numbers:", 0Dh, 0Ah, 0
 medianMsg 		BYTE 		"The median is ", 0
 sortedMsg 		BYTE 		"The sorted random numbers:", 0Dh, 0Ah, 0
 goodbyeMsg 		BYTE 		"Until next time ", 0Dh, 0Ah, 0
-spaces  		BYTE 		"	", 0 
+spaces  		BYTE 		"	", 0
 
 request 		DWORD		?			; number of random numbers desired by user
 array			DWORD 		MAX DUP(?)  ; array to hold random numbers
- 
+
 .code
 
 main PROC
-; Program Intro	
+; Program Intro
 	push 	OFFSET introduction
 	call 	intro
 ; Get User Data (number of randoms)
@@ -65,21 +63,21 @@ main PROC
 	push 	OFFSET request 				; pass by reference
 	call 	getData
 ; Generate Random Numbers and Fill Array
-	call 	Randomize  					; seed random number generator	
+	call 	Randomize  					; seed random number generator
 	push 	OFFSET array 				; pass by reference
 	push 	request						; pass by value
 	call 	fillArr
 ; Display Array(as generated, unsorted)
 	push 	OFFSET spaces 				; pass by value
 	push 	OFFSET array 				; pass by reference
-	push 	request						; pass by value	
+	push 	request						; pass by value
 	push 	OFFSET unsortedMsg			; pass by reference
 	call 	displayList
 ; Sort Array
 	push 	OFFSET array 				; pass by reference
 	push 	request						; pass by value
 	call 	sortList
-; Display Median 
+; Display Median
 	push 	OFFSET array 				; pass by reference
 	push 	request 					; pass by value
 	push 	OFFSET medianMsg 			; pass by reference
@@ -89,7 +87,7 @@ main PROC
 	push 	OFFSET array 				; pass by reference
 	push 	request  					; pass by value
 	push 	OFFSET sortedMsg 			; pass by reference
-	call 	displayList	
+	call 	displayList
 ; Say Goodbye
 	push 	OFFSET goodbyeMsg			; pass by reference
 	call 	farewell
@@ -100,11 +98,11 @@ main ENDP
 ;--------------------------------------------------------
 intro 	PROC
 ; Displays programmers name, program title, and gives
-; 	instructions to user 
+; 	instructions to user
 ; Receives: introduction:[ebp+8]
 ; Returns: nothing
 ; Preconditions: initialize edx
-; Registers Changed: edx 
+; Registers Changed: edx
 ;--------------------------------------------------------
 	mPush
 	mov 	edx, [ebp+8]
@@ -114,7 +112,7 @@ intro 	ENDP
 
 ;--------------------------------------------------------
 getData 	PROC
-; Prompt user for integer in [10, 200].  Verify if within 
+; Prompt user for integer in [10, 200].  Verify if within
 ; 	range and loop until valid input received
 ; Receives: request:[ebp+8], prompt:[ebp+12], errorMsg:[ebp+16]
 ; Returns: request assigned a value within range
@@ -145,211 +143,211 @@ getData 	ENDP
 
 ;--------------------------------------------------------
 fillArr 	PROC
-; Generates n random numbers where n=request. Stores the 
+; Generates n random numbers where n=request. Stores the
 ; random numbers in array.
 ; Receives: request:[ebp+8], array:[ebp+12]
-; Returns: array filled with n "random" numbers 
+; Returns: array filled with n "random" numbers
 ; Preconditions: request is a value within range, call Randomize
 ; Registers Changed: none
 ;--------------------------------------------------------
 	mPush
 
-	mov 	ecx, [ebp+8] 		; request, use as counter 
+	mov 	ecx, [ebp+8] 		; request, use as counter
 	mov 	edi, [ebp+12] 		; array
 generator:
 	mov 	eax, HI   			; generate range for the random numbers
 	sub 	eax, LO
-	inc  	eax  
+	inc  	eax
 	call 	RandomRange
 	add 	eax, LO
-	mov 	[edi], eax 			; put random number in array	
-	add 	edi, 4 				; next location in array 
-	loop 	generator 
-	
+	mov 	[edi], eax 			; put random number in array
+	add 	edi, 4 				; next location in array
+	loop 	generator
+
 	mPop 	8 					; 4+4
 fillArr 	ENDP
 
 ;--------------------------------------------------------
 displayList 	PROC
-; Displays 10 random numbers per row, ordered by column 
+; Displays 10 random numbers per row, ordered by column
 ; Receives: unsortedMsg:[ebp+8], request:(value)[ebp+12],
-; 	array:[ebp+16], spaces:[ebp+20] 
+; 	array:[ebp+16], spaces:[ebp+20]
 ; Returns: nothing
 ; Preconditions: request within range
-; Registers Changed: none 
-;-------------------------------------------------------- 
+; Registers Changed: none
+;--------------------------------------------------------
 	mPush
 
-	mov 	edx, [ebp+8] 		; unsortedMsg 
+	mov 	edx, [ebp+8] 		; unsortedMsg
 	call 	WriteString
-	mov 	ecx, [ebp+12] 		; request as counter in ECX 
-	mov 	esi, [ebp+16] 		; array 
+	mov 	ecx, [ebp+12] 		; request as counter in ECX
+	mov 	esi, [ebp+16] 		; array
 
 ; calculate index of element to be displayed in next column
-; index depends on number of rows(#rows = request/10) 
+; index depends on number of rows(#rows = request/10)
 columns:
 	mov 	edx, 0 				; clear dividend
 	mov 	eax, ecx 			; request = dividend
-	mov 	ebx, 10 			; 10 = divisor 
+	mov 	ebx, 10 			; 10 = divisor
 	div 	ebx  				; eax = #rows = request/10
-	mov 	ebx, TYPE DWORD     
+	mov 	ebx, TYPE DWORD
 	mul 	ebx 		 		; get index
-	mov 	temp_local, eax  	; save in local 
+	mov 	temp_local, eax  	; save in local
 
-	mov 	ebx, 0 				; initialize ebx as count 
+	mov 	ebx, 0 				; initialize ebx as count
 
-print:	
+print:
 	mov 	eax, [esi] 			; access first value of array
-	call  	WriteDec			; print it 
-	inc  	ebx 
+	call  	WriteDec			; print it
+	inc  	ebx
 	add 	esi, temp_local		; element for next column
 	cmp 	ebx, 10 			; ensure only 10 numbers per line
-	jne 	noLine 				
+	jne 	noLine
 
 ; iterate through array to fill first column of each row
-; need to move esi back to front of array  
+; need to move esi back to front of array
 rows:
 	call 	CrLf 				; new line
-	mov 	eax, temp_local 	; 
+	mov 	eax, temp_local 	;
 	mul 	ebx
 	sub 	esi, eax
 	add 	esi, TYPE DWORD
 
-	mov 	ebx, 0 				; reset counter 				
-	jmp 	loopPrint 
+	mov 	ebx, 0 				; reset counter
+	jmp 	loopPrint
 
 noLine:
-	mov 	edx, [ebp+20] 		; add spaces between numbers 
+	mov 	edx, [ebp+20] 		; add spaces between numbers
 	call 	WriteString
 
 loopPrint:
-	loop 	print 	 		
+	loop 	print
 	call 	CrLf
 
 	mPop 	16 					; 4+4+4+4
 displayList 	ENDP
 
 ;--------------------------------------------------------
-sortList 	PROC 
+sortList 	PROC
 ; Sort array in descending order using Quicksort
 ; Receives: request:[ebp+8], array:[ebp+12]
-; Returns: sorted array 
-; Preconditions: non-empty array 
+; Returns: sorted array
+; Preconditions: non-empty array
 ; Registers Changed: none
 ;--------------------------------------------------------
 	mPush
 
-	mov 	ecx, [ebp+8] 		; request, use as counter 
+	mov 	ecx, [ebp+8] 		; request, use as counter
 	mov 	esi, [ebp+12] 		; array
 	shl 	ecx, 2 				; multiply by 4 for index of last element
 
 	mov 	eax, 0 				; low index
-	mov 	ebx, ecx  			; high index 
-	call 	QuickSort  			
+	mov 	ebx, ecx  			; high index
+	call 	QuickSort
 
-	mPop	 8  				; 4+4 
+	mPop	 8  				; 4+4
 sortList 	ENDP
 
 ;--------------------------------------------------------
-QuickSort 	PROC 
-; Uses a recursive QuickSort algorithm by Miguel Casillas 
+QuickSort 	PROC
+; Uses a recursive QuickSort algorithm by Miguel Casillas
 ; Receives: none
-; Returns: sorted array 
+; Returns: sorted array
 ; Preconditions: request in ecx, array in esi, low index
-; 	in eax, high index in ebx 
-; Registers Changed: 
+; 	in eax, high index in ebx
+; Registers Changed:
 ;--------------------------------------------------------
 	cmp 	eax, ebx 			; if (low >= high)
 	jge  	backToSortList 		; finished sorting
-	
-	push 	eax 				; save low, use eax as i 
+
+	push 	eax 				; save low, use eax as i
 	push 	ebx					; save high, use ebx as j
 	add 	ebx, 4 				; j = high + 1
-	
-	mov 	edi, [esi+eax] 		; use low index as pivot	
+
+	mov 	edi, [esi+eax] 		; use low index as pivot
 
 frontLoop:
 	add 	eax, 4 				; i++
-	
-	cmp 	eax, ebx 			; if (i >= j)    
-	jge 	backLoop 			; exit loop 
 
-	cmp 	[esi+eax], edi 		; if (array[i] < pivot) 
-	jl 	 	backLoop			; exit loop 
+	cmp 	eax, ebx 			; if (i >= j)
+	jge 	backLoop 			; exit loop
+
+	cmp 	[esi+eax], edi 		; if (array[i] < pivot)
+	jl 	 	backLoop			; exit loop
 
 	jmp 	frontLoop 			; while(i < j && array[i] < pivot)
 
 backLoop:
-	sub 	ebx, 4 				; j-- 
+	sub 	ebx, 4 				; j--
 
 	cmp 	[esi+ebx], edi 		; if (array[j] >= pivot)
-	jge 	firstSwap			; exit loop 
+	jge 	firstSwap			; exit loop
 	jmp 	backLoop 			; while(array[j] > pivot)
 
 firstSwap:
 	cmp 	eax, ebx 			; if (i >= j)
-	jge 	secondSwap 			; no swap here 
+	jge 	secondSwap 			; no swap here
 
-	
+
 	push 	[esi+eax] 			; swap array[i], array[j]
 	push 	[esi+ebx]
 	pop 	[esi+eax]
 	pop 	[esi+ebx]
-	jmp  	frontLoop 			; keep sorting 
+	jmp  	frontLoop 			; keep sorting
 
 secondSwap:
 	pop 	edi 				; restore high
-	pop 	ecx 				; restore low 
+	pop 	ecx 				; restore low
 
 	cmp 	ecx, ebx 			; if (low == j)
-	je 		noSwap				; no swap here 
+	je 		noSwap				; no swap here
 
 	push 	[esi+ecx] 			; swap array[low], array[j]
 	push 	[esi+ebx]
 	pop 	[esi+ecx]
-	pop 	[esi+ebx] 
+	pop 	[esi+ebx]
 
 noSwap:
 	mov 	eax, ecx 			; low index
 	push 	edi 				; high index
-	push  	ebx 				; j 
+	push  	ebx 				; j
 
-	sub 	ebx, 4 				; j-1 
+	sub 	ebx, 4 				; j-1
 	call 	QuickSort
 
-	pop 	eax 				; j 
+	pop 	eax 				; j
 	add 	eax, 4  			; j + 1
 	pop 	ebx 				; high index
 	call  	QuickSort
 
-backToSortList:	
+backToSortList:
 	ret 						; back up to sortList
 QuickSort 	ENDP
 
 ;--------------------------------------------------------
-displayMedian 	PROC 
-; Calcuates and displays median of sorted array  
-; Receives: medianMsg:[ebp+8], request:[ebp+12], 
+displayMedian 	PROC
+; Calcuates and displays median of sorted array
+; Receives: medianMsg:[ebp+8], request:[ebp+12],
 ; 	array:[ebp+16]
 ; Returns: nothing
-; Preconditions: array has been sorted 
-; Registers Changed: 
+; Preconditions: array has been sorted
+; Registers Changed:
 ;--------------------------------------------------------
 	mPush
-	mov 	esi, [ebp+16] 		; array 
+	mov 	esi, [ebp+16] 		; array
 	mov 	eax, [ebp+12] 		; request
 	mov  	edx, [ebp+8]		; medianMsg
 	call 	WriteString 		; print medianMsg
 
 	test  	eax, 1 				; check if number of array elements is even
-	jz 		evenPrint  			; jump to evenReq if even 
-	jmp 	oddPrint 			; else jump to oddReq 
+	jz 		evenPrint  			; jump to evenReq if even
+	jmp 	oddPrint 			; else jump to oddReq
 
 evenPrint:
 	shr 	eax, 1
 	shl 	eax, 2 				; multiply request by 4 to get first index
 	add 	esi, eax
-	mov 	eax, [esi] 			
+	mov 	eax, [esi]
 	add  	eax, [esi-4] 		; average numbers to get median value
 	shr 	eax, 1
 	call 	WriteDec
@@ -359,18 +357,18 @@ oddPrint:
 	shr 	eax, 1
 	shl 	eax, 2 				; multiply request by 4 to get index of median in array
 	add 	esi, eax
-	mov 	eax, [esi] 			; get value at median index 
+	mov 	eax, [esi] 			; get value at median index
 	call 	WriteDec
 
-backToMain: 
+backToMain:
 	call 	CrLf
-	
-	mPop 	12 					; 4+4+4 
+
+	mPop 	12 					; 4+4+4
 displayMedian 	ENDP
 
 ;--------------------------------------------------------
 farewell 	PROC
-; Says goodbye 
+; Says goodbye
 ; Receives: goodbyeMsg:[ebp+8]
 ; Returns: nothing
 ; Preconditions: none
