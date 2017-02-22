@@ -1,8 +1,6 @@
 TITLE Project 03    (project03DePrey.asm)
 
 ; Author: Joseph DePrey
-; depreyj@oregonstate.edu
-; CS271-400 / Project 03                  Due Date: 5/1/16
 ; Description: A program to perform the following:
 ; 1. Display the program title and programmer’s name.
 ; 2. Get the user’s name, and greet the user.
@@ -19,10 +17,9 @@ TITLE Project 03    (project03DePrey.asm)
 ;	iii. the average, rounded to the nearest integer (e.g. -20.5 
 ;	rounds to -20)
 ; 	iv. a parting message (with the user’s name)
-; **EC: Number the lines during user input
-; **EC: Calculate and display the average as a floating-point number,
+; Extras: Number the lines during user input
+;         Calculate and display the average as a floating-point number,
 ; 		rounded to the nearest .001
-; **EC: Seomthing astoundingly creative
 
 
 INCLUDE Irvine32.inc
