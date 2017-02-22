@@ -1,8 +1,6 @@
-TITLE Project 02    (project02DePrey.asm)
+TITLE fibonacci    (fibonacci.asm)
 
 ; Author: Joseph DePrey
-; depreyj@oregonstate.edu
-; CS271-400 / Project 02                  Due Date: 4/17/16
 ; Description: A program to calculate Fibonacci numbers 
 ; 	Displays programmers name and program title on the output screen
 ; 	Gets users name and greets user
@@ -13,8 +11,8 @@ TITLE Project 02    (project02DePrey.asm)
 ; 		the nth term. The results are displayed 5 terms per line with at 
 ;		least 5 spaces between terms.
 ;	Display a parting message that includes the user’s name, and terminate the program.
-; **EC: Number aligned in columns, 5 terms per line
-; **EC: Someting incredible, different colored text for each term
+; Extras: Number aligned in columns, 5 terms per line
+;  	  Someting incredible, different colored text for each term
 
 
 INCLUDE Irvine32.inc
