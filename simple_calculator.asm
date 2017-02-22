@@ -1,17 +1,15 @@
-TITLE Project 01     (project01.asm)
+TITLE Simple Calculator     (simple_calculator.asm)
 
 ; Author: Joseph DePrey
-; depreyj@oregonstate.edu
-; CS271-400 / Project 01                  Due Date: 4/10/16
 ; Description: A program which does the following: 
 ; 1. Displays programmers name and program title on the output screen
 ; 2. Displays instructions for the user
 ; 3. Prompts the user to enter two numbers
 ; 4. Calculates the sum, difference, product, (integer)quotient and remainder of those numbers
 ; 5. Displays a terminating message
-; **EC: Program repeats until the user chooses to quit
-; **EC: Program verifies second number less than first
-; **EC: Program calculates and displays quotient as floating-point number, rounded to nearest .001 
+; Extras: Program repeats until the user chooses to quit
+; 	Program verifies second number less than first
+; 	Program calculates and displays quotient as floating-point number, rounded to nearest .001 
 
 
 INCLUDE Irvine32.inc
