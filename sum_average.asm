@@ -1,4 +1,4 @@
-TITLE Project 03    (project03DePrey.asm)
+TITLE sum_average    (sum_average.asm)
 
 ; Author: Joseph DePrey
 ; Description: A program to perform the following:
